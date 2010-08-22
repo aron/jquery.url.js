@@ -7,27 +7,33 @@ test('new URL()', function () {
 	ok(url instanceof URL);
 });
 
-test('URL#attr()', function () {
+test('url.attr()', function () {
 	var url = new URL(url_string);
 
-	equals(url.attr('hash'), '#jQuery.ajax-settings');
-	equals(url.attr('host'), 'api.jquery.com');
-	equals(url.attr('hostname'), 'api.jquery.com');
-	equals(url.attr('href'), url_string, 'href');
-	equals(url.attr('pathname'), 'jQuery.ajax');
-	equals(url.attr('port'), '');
-	equals(url.attr('protocol'), 'http:');
-	equals(url.attr('search'), '?key1=value1&key2=value2&key3');
-	equals(url.attr(), undefined);
+	equals(url.attr('hash'), '#jQuery.ajax-settings', 'url.attr("hash")');
+	equals(url.attr('host'), 'api.jquery.com', 'url.attr("host")');
+	equals(url.attr('hostname'), 'api.jquery.com', 'url.attr("hostname")');
+	equals(url.attr('href'), url_string, 'url.attr("href")');
+	equals(url.attr('pathname'), '/jQuery.ajax/', 'url.attr("pathname")');
+	equals(url.attr('port'), '', 'url.attr("port")');
+	equals(url.attr('protocol'), 'http:', 'url.attr("protocol")');
+	equals(url.attr('search'), '?key1=value1&key2=value2&key3', 'url.attr("search")');
+	equals(url.attr(), undefined, 'url.attr()');
+
+	url = new URL('http://api.jquery.com:8080/');
+	equals(url.attr('port'), 8080, 'url.attr("port")');
+
+	url = new URL('http://api.jquery.com:80/');
+	equals(url.attr('port'), 80, 'url.attr("port")');
 });
 
-test('URL#segment()', function () {
+test('url.segment()', function () {
 	var url = new URL(url_string);
 
 	equals(url.segment(1), 'jQuery.ajax');
 });
 
-test('URL#param()', function () {
+test('url.param()', function () {
 	var url = new URL(url_string);
 
 	equals(url.param('key1'), 'value1');
@@ -36,12 +42,12 @@ test('URL#param()', function () {
 	equals(url.param('key4'), undefined);
 });
 
-test('URL#get()', function () {
+test('url.get()', function () {
 	var url = new URL(url_string);
 	equals(url.get(), url_string);
 });
 
-test('URL#toString()', function () {
+test('url.toString()', function () {
 	var url = new URL(url_string);
 	equals(url.toString(), url_string);
 });
