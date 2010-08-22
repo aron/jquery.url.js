@@ -7,7 +7,35 @@
 	var properties,
 	    map;
 
-	properties = ['hash', 'href', 'host', 'hostname', 'pathname', 'port', 'protocol', 'search'];
+	properties = ['hash', 'href', 'host', 'pathname', 'port', 'protocol', 'search'];
+
+	map = {
+		hash: 'hash',
+		host: 'host',
+		hostname: 'host',
+		pathname: 'pathname',
+		port: function (key, value) {
+			var anchor_port = this._anchor['port'];
+			if ((key === 'port' && value == 80) || (key === 'href' && (/\:80[^\d]/).test(value))) {
+				value = 80;
+			}
+			else if (anchor_port === '0' || anchor_port === '') {
+				value = '';
+			} else {
+				value = parseInt(anchor_port, 10);
+			}
+			return value;
+		},
+		protocol: 'protocol',
+		search: 'search',
+		params: function (key, value) {
+			var params = {};
+			return params;
+		},
+		href: function (key, value) {
+			return this.toString();
+		}
+	};
 
 	function isURLProperty(property) {
 		return (properties.indexOf(property) !== -1);
@@ -21,13 +49,13 @@
 	URL.prototype = {
 		constructor: URL,
 		attr: function () {
-			
+
 		},
 		segment: function () {
-			
+
 		},
 		param: function () {
-			
+
 		},
 		attr: function (key, value) {
 			if (value === undefined) {
@@ -57,22 +85,13 @@
 				this._anchor[key] = value;
 			}
 
-			for (; index < length; index += 1) {
-				property = properties[index];
-				if (property === 'port') {
-					if ((key === 'port' && value == 80) || (key === 'href' && (/\:80[^\d]/).test(value))) {
-						this[property] = 80;
-					}
-					else if (this._anchor[property] === '0' || this._anchor[property] === '') {
-						this[property] = '';
-					} else {
-						this[property] = parseInt(this._anchor[property], 10);
-					}
+			for (property in map) {
+				if (typeof map[property] === 'function') {
+					this[property] = map[property].call(this, key, value);
 				} else {
 					this[property] = this._anchor[property];
 				}
 			}
-			this['href'] = this.toString();
 		}
 	};
 

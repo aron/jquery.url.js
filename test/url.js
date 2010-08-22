@@ -18,6 +18,7 @@ test('url.attr()', function () {
 	equals(url.attr('port'), '', 'url.attr("port")');
 	equals(url.attr('protocol'), 'http:', 'url.attr("protocol")');
 	equals(url.attr('search'), '?key1=value1&key2=value2&key3', 'url.attr("search")');
+	equals(url.attr('params'), {key1:'value1', key2:'value2', key3:''}, 'url.attr("params")');
 	equals(url.attr(), undefined, 'url.attr()');
 
 	url = new URL('http://api.jquery.com:8080/');
