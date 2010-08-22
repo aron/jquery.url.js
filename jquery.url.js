@@ -2,6 +2,14 @@
 // Written by Mark Perkins, mark@allmarkedup.com
 // License: http://unlicense.org/ (i.e. do what you want with it!)
 
-;(function($, window, undefined){
+;(function($, window, undefined) {
+	function URL(url) {
+		
+	}
 
-})(jQuery, this);
+	if ($ === undefined) {
+		window.URL = URL;
+	} else {
+
+	}
+})(this.jQuery, this);
