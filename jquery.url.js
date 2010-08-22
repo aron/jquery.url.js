@@ -7,6 +7,28 @@
 		
 	}
 
+	URL.prototype = {
+		constructor: URL,
+		attr: function () {
+			
+		},
+		segment: function () {
+			
+		},
+		param: function () {
+			
+		},
+		attr: function () {
+			
+		},
+		get: function () {
+			return this.toString();
+		},
+		toString: function () {
+			
+		}
+	};
+
 	if ($ === undefined) {
 		window.URL = URL;
 	} else {
