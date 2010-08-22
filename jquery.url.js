@@ -14,6 +14,7 @@
 		host: 'host',
 		hostname: 'host',
 		pathname: 'pathname',
+		path: 'pathname',
 		port: function (key, value) {
 			var anchor_port = this._anchor['port'];
 			if ((key === 'port' && value == 80) || (key === 'href' && (/\:80[^\d]/).test(value))) {
@@ -28,12 +29,29 @@
 		},
 		protocol: 'protocol',
 		search: 'search',
+		query: 'search',
 		params: function (key, value) {
-			var params = {};
+			var params = {},
+			    query = this.search.replace(/^\?/, '').split('&'),
+			    index = 0,
+			    length = query.length,
+			    param;
+
+			for (; index < length; index += 1) {
+				param = query[index].split('=');
+				params[param[0]] = '';
+				if (param[1]) {
+					params[param[0]] = param[1];
+				}
+			}
 			return params;
 		},
+		segments: function (key, value) {
+			return this.pathname.replace(/^\/|\/$/g, '').split('/');
+		},
 		href: function (key, value) {
-			return this.toString();
+			this.source = this.toString();
+			return this.source;
 		}
 	};
 
@@ -86,10 +104,12 @@
 			}
 
 			for (property in map) {
-				if (typeof map[property] === 'function') {
-					this[property] = map[property].call(this, key, value);
-				} else {
-					this[property] = this._anchor[property];
+				if (map.hasOwnProperty(property)) {
+					if (typeof map[property] === 'function') {
+						this[property] = map[property].call(this, key, value);
+					} else {
+						this[property] = this._anchor[map[property]];
+					}
 				}
 			}
 		}

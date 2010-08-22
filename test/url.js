@@ -18,8 +18,12 @@ test('url.attr()', function () {
 	equals(url.attr('port'), '', 'url.attr("port")');
 	equals(url.attr('protocol'), 'http:', 'url.attr("protocol")');
 	equals(url.attr('search'), '?key1=value1&key2=value2&key3', 'url.attr("search")');
-	equals(url.attr('params'), {key1:'value1', key2:'value2', key3:''}, 'url.attr("params")');
 	equals(url.attr(), undefined, 'url.attr()');
+
+	equals(url.attr('path'), '/jQuery.ajax/', 'url.attr("path")');
+	equals(url.attr('query'), '?key1=value1&key2=value2&key3', 'url.attr("query")');
+	same(url.attr('params'), {key1:'value1', key2:'value2', key3:''}, 'url.attr("params")');
+	same(url.attr('segments'), ['jQuery.ajax'], 'url.attr("segments")');
 
 	url = new URL('http://api.jquery.com:8080/');
 	equals(url.attr('port'), 8080, 'url.attr("port")');
