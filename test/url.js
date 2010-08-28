@@ -42,7 +42,10 @@ test('url.attr() -> setter', function () {
 	   .attr('protocol', 'https:')
 	   .attr('search', '?param1=value1');
 
-	equals(url.toString(), 'https://example.com:8080/part1/part2/?param1=value1#hash', 'setter url.attr()');
+	equals(url.get(), 'https://example.com:8080/part1/part2/?param1=value1#hash', 'setter url.attr()');
+	
+	url.attr('href', 'http://www.example.com');
+	equals(url.get(), 'http://www.example.com/');
 });
 
 test('url.segment()', function () {

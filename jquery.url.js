@@ -33,6 +33,21 @@
 		return reciever;
 	}
 
+	function getURLData(url) {
+		var data = {},
+		    index, length = properties.length, property;
+
+		anchor.href = url;
+		for (index = 0; index < length; index += 1) {
+			property = properties[index];
+			mapAttributes.call(data, properties[index], anchor[property]);
+		}
+		if (/\:80\//.test(url)) {
+			data.port = 80;
+		}
+		return data;
+	}
+
 	function mapAttributes(key, value) {
 		object = value === undefined ? getters : setters;
 		if (typeof object[key] === 'function') {
@@ -80,14 +95,15 @@
 			return supplant(URL.template, data);
 		},
 		pathname: function () {
-			return '/' + this.pathname.join('/') + '/';
+			var path = this.pathname.join('/');
+			return path ? ('/' + path + '/') : '/';
 		},
 		search: function () {
 			var key, params = this.search, search = [];
 			for (key in params) {
 				search.push(key + ((params[key]) ? ('=' + params[key]) : ''));
 			}
-			return '?' + search.join('&');
+			return (search.length) ? '?' + search.join('&') : '';
 		},
 		params: function () {
 			return this.search;
@@ -98,6 +114,9 @@
 	};
 
 	setters = {
+		href: function (value) {
+			extend(this, getURLData(value));
+		},
 		pathname: function (value) {
 			if (typeof value === 'object') {
 				value = getters.pathname.call(this);
@@ -123,12 +142,15 @@
 				search = getters.search.call(this);
 			}
 
-			query = search.replace(/^\?/, '').split('&');
-			for (length = query.length; index < length; index += 1) {
-				param = query[index].split('=');
-				params[param[0]] = '';
-				if (param[1]) {
-					params[param[0]] = param[1];
+			search = search.replace(/^\?/, '');
+			if (search) {
+				query = search.split('&');
+				for (length = query.length; index < length; index += 1) {
+					param = query[index].split('=');
+					params[param[0]] = '';
+					if (param[1]) {
+						params[param[0]] = param[1];
+					}
 				}
 			}
 			this.search = params;
@@ -141,18 +163,7 @@
 	}
 
 	function URL(url) {
-		var data = {},
-		    index, length = properties.length, property;
-
-		anchor.href = url;
-		for (index = 0; index < length; index += 1) {
-			property = properties[index];
-			mapAttributes.call(data, properties[index], anchor[property]);
-		}
-		if (/\:80\//.test(url)) {
-			data.port = 80;
-		}
-		this._data = data;
+		this._data = getURLData(url);
 	}
 
 	URL.template = '{protocol}//{host}{port}{pathname}{search}{hash}';
