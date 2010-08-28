@@ -13,6 +13,8 @@
 		return [undefined, null, NaN].indexOf(value) === -1;
 	}
 
+	// ! Utilities
+
 	// http://javascript.crockford.com/remedial.html
 	function supplant(string, values) {
 		return string.replace(/{([^{}]*)}/g,
@@ -33,15 +35,35 @@
 		return reciever;
 	}
 
+	function forEach(object, callback, context) {
+		var index, length;
+		if (object.length) {
+			if (Array.prototype.forEach) {
+				Array.prototype.forEach.call(object, callback, context);
+			} else {
+				for (index = 0, length = index.length; index < length; index += 1) {
+					callback.call(context || this, object[index], index, object);
+				}
+			}
+		} else {
+			for (index in object) {
+				if (object.hasOwnProperty(index)) {
+					callback.call(context || this, object[index], index, object);
+				}
+			}
+		}
+	}
+
+	// ! Private Functions
+
 	function getURLData(url) {
-		var data = {},
-		    index, length = properties.length, property;
+		var data = {};
 
 		anchor.href = url;
-		for (index = 0; index < length; index += 1) {
-			property = properties[index];
-			mapAttributes.call(data, properties[index], anchor[property]);
-		}
+		forEach(properties, function (property) {
+			mapAttributes.call(data, property, anchor[property]);
+		});
+
 		if (/\:80\//.test(url)) {
 			data.port = 80;
 		}
@@ -130,13 +152,9 @@
 			}
 			this.port = value;
 		},
-		search: function (value) {
+		search: function (search) {
 			var params = {},
-			    search = value,
-			    query,
-			    index = 0,
-			    length,
-			    param;
+			    query;
 
 			if (typeof search === 'object') {
 				search = getters.search.call(this);
@@ -145,22 +163,24 @@
 			search = search.replace(/^\?/, '');
 			if (search) {
 				query = search.split('&');
-				for (length = query.length; index < length; index += 1) {
-					param = query[index].split('=');
+				forEach(query, function (pair) {
+					param = pair.split('=');
 					params[param[0]] = '';
 					if (param[1]) {
 						params[param[0]] = param[1];
 					}
-				}
+				});
 			}
 			this.search = params;
 		}
 	};
 
 	for (var key in aliases) {
-		getters[key] = alias(aliases[key], getters);
-		setters[key] = alias(aliases[key], setters);
+		getters[key] = alias(aliases[key]);
+		setters[key] = alias(aliases[key]);
 	}
+
+	// ! Public API
 
 	function URL(url) {
 		this._data = getURLData(url);
