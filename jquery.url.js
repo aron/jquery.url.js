@@ -148,8 +148,16 @@
 		segment: function () {
 
 		},
-		param: function () {
-
+		param: function (key, value) {
+			var params = this.attr('params');
+			if (key && value) {
+				params[key] = value;
+				this.attr('params', params);
+			}
+			else if (key) {
+				return params[key];
+			}
+			return params;
 		},
 		attr: function (key, value) {
 			if (value === undefined) {
