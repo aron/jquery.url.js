@@ -11,7 +11,7 @@
 
 	function truthy(value) {
 		return [undefined, null, NaN].indexOf(value) === -1;
-	} 
+	}
 
 	// http://javascript.crockford.com/remedial.html
 	function supplant(string, values) {
@@ -194,6 +194,27 @@
 	if ($ === undefined) {
 		window.URL = URL;
 	} else {
+		$.url = function (url) {
+			var map = {
+				a: 'href', img: 'src', form: 'action', base: 'href',
+				script: 'src', iframe: 'src', link: 'href'
+			};
 
+			if (url instanceof jQuery) {
+				url = url.get(0);
+			}
+
+			if (url.tagName) {
+				url = url[map[url.tagName]];
+			}
+
+			return new URL(url);
+		};
+
+		$.fn.url = function () {
+			return $.url(this);
+		};
+
+		$.url.URL = URL;
 	}
 })(this.jQuery, this);

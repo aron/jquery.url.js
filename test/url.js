@@ -48,9 +48,19 @@ test('url.attr() -> setter', function () {
 	equals(url.get(), 'http://www.example.com/');
 });
 
-test('url.segment()', function () {
+test('url.segment() -> getter', function () {
 	var url = new URL(url_string);
 	equals(url.segment(0), 'jQuery.ajax');
+	equals(url.segment(6), undefined);
+	same(url.segment(), ['jQuery.ajax']);
+});
+
+test('url.segment() -> setter', function () {
+	var url = new URL(url_string);
+	url.segment(0, 'segment1').segment(6, 'segment5');
+
+	equals(url.segment(0), 'segment1');
+	equals(url.segment(6), 'segment5');
 });
 
 test('url.param() -> getter', function () {
@@ -60,6 +70,7 @@ test('url.param() -> getter', function () {
 	equals(url.param('key2'), 'value2');
 	equals(url.param('key3'), '');
 	equals(url.param('key4'), undefined);
+	same(url.param(), {key1:'value1',key2:'value2',key3:''});
 });
 
 test('url.param() -> setter', function () {
