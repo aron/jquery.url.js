@@ -153,6 +153,7 @@
 			if (key && value) {
 				params[key] = value;
 				this.attr('params', params);
+				return this;
 			}
 			else if (key) {
 				return params[key];

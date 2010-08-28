@@ -51,13 +51,22 @@ test('url.segment()', function () {
 	equals(url.segment(1), 'jQuery.ajax');
 });
 
-test('url.param()', function () {
+test('url.param() -> getter', function () {
 	var url = new URL(url_string);
 
 	equals(url.param('key1'), 'value1');
 	equals(url.param('key2'), 'value2');
 	equals(url.param('key3'), '');
 	equals(url.param('key4'), undefined);
+});
+
+test('url.param() -> setter', function () {
+	var url = new URL(url_string);
+
+	url.param('key4', 'value4').param('key1', 'updated1');
+
+	equals(url.param('key1'), 'updated1');
+	equals(url.param('key4'), 'value4');
 });
 
 test('url.get()', function () {
