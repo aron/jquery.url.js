@@ -9,6 +9,10 @@
 
 	properties = ['hash', 'host', 'pathname', 'port', 'protocol', 'search'];
 
+	function truthy(value) {
+		return [undefined, null, NaN].indexOf(value) === -1;
+	} 
+
 	// http://javascript.crockford.com/remedial.html
 	function supplant(string, values) {
 		return string.replace(/{([^{}]*)}/g,
@@ -39,6 +43,19 @@
 			this[key] = value;
 		}
 		return value;
+	}
+
+	function getOrSetObjectAttribute(attr, key, value) {
+		var params = this.attr(attr);
+		if (truthy(key) && truthy(value)) {
+			params[key] = value;
+			this.attr(attr, params);
+			return this;
+		}
+		else if (truthy(key)) {
+			return params[key];
+		}
+		return params;
 	}
 
 	function alias(key, map) {
@@ -142,23 +159,11 @@
 
 	URL.prototype = {
 		constructor: URL,
-		attr: function () {
-
-		},
-		segment: function () {
-
+		segment: function (index, value) {
+			return getOrSetObjectAttribute.call(this, 'segments', index, value);
 		},
 		param: function (key, value) {
-			var params = this.attr('params');
-			if (key && value) {
-				params[key] = value;
-				this.attr('params', params);
-				return this;
-			}
-			else if (key) {
-				return params[key];
-			}
-			return params;
+			return getOrSetObjectAttribute.call(this, 'params', key, value);
 		},
 		attr: function (key, value) {
 			if (value === undefined) {

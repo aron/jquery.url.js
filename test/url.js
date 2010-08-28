@@ -47,8 +47,7 @@ test('url.attr() -> setter', function () {
 
 test('url.segment()', function () {
 	var url = new URL(url_string);
-
-	equals(url.segment(1), 'jQuery.ajax');
+	equals(url.segment(0), 'jQuery.ajax');
 });
 
 test('url.param() -> getter', function () {
