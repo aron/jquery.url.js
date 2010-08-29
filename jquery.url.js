@@ -25,16 +25,6 @@
 		);
 	}
 
-	function extend(reciever, object) {
-		var key;
-		for (key in object) {
-			if (object.hasOwnProperty(key)) {
-				reciever[key] = object[key];
-			}
-		}
-		return reciever;
-	}
-
 	function forEach(object, callback, context) {
 		var index, length;
 		if (object.length) {
@@ -54,6 +44,13 @@
 		}
 	}
 
+	function extend(reciever, object) {
+		forEach(object, function (value, key) {
+			reciever[key] = value;
+		});
+		return reciever;
+	}
+
 	// ! Private Functions
 
 	function getURLData(url) {
@@ -64,9 +61,7 @@
 			mapAttributes.call(data, property, anchor[property]);
 		});
 
-		if (/\:80\//.test(url)) {
-			data.port = 80;
-		}
+		if (/\:80\//.test(url)) { data.port = 80; }
 		return data;
 	}
 
@@ -100,13 +95,6 @@
 			return mapAttributes.call(this, key);
 		};
 	}
-
-	aliases = {
-		hostname: 'host',
-		source: 'href',
-		path: 'pathname',
-		query: 'search'
-	};
 
 	getters = {
 		href: function () {
@@ -175,10 +163,17 @@
 		}
 	};
 
-	for (var key in aliases) {
-		getters[key] = alias(aliases[key]);
-		setters[key] = alias(aliases[key]);
-	}
+	aliases = {
+		hostname: 'host',
+		source: 'href',
+		path: 'pathname',
+		query: 'search'
+	};
+
+	forEach(aliases, function (attr, key) {
+		getters[key] = alias(attr);
+		setters[key] = alias(attr);
+	});
 
 	// ! Public API
 
@@ -220,13 +215,8 @@
 				script: 'src', iframe: 'src', link: 'href'
 			};
 
-			if (url instanceof jQuery) {
-				url = url.get(0);
-			}
-
-			if (url.tagName) {
-				url = url[map[url.tagName]];
-			}
+			if (url instanceof jQuery) { url = url.get(0); }
+			if (url.tagName) { url = url[map[url.tagName]]; }
 
 			return new URL(url);
 		};
