@@ -5,9 +5,7 @@
 ;(function($, window, undefined) {
 
 	var anchor = document.createElement('a'),
-	    properties, setters, getters, aliases;
-
-	properties = ['hash', 'host', 'pathname', 'port', 'protocol', 'search'];
+	    setters, getters, aliases;
 
 	function truthy(value) {
 		return [undefined, null, NaN].indexOf(value) === -1;
@@ -55,29 +53,34 @@
 
 	function getURLData(url) {
 		var data = {};
-
 		anchor.href = url;
-		forEach(properties, function (property) {
-			mapAttributes.call(data, property, anchor[property]);
+
+		forEach(['hash', 'host', 'port', 'protocol'], function (property) {
+			setAttribute.call(data, property, anchor[property]);
 		});
 
+		setters.pathname.call(data, anchor.pathname);
+		setters.search.call(data, anchor.search);
 		if (/\:80\//.test(url)) { data.port = 80; }
 		return data;
 	}
 
-	function mapAttributes(key, value) {
-		object = value === undefined ? getters : setters;
-		if (typeof object[key] === 'function') {
-			value = object[key].call(this, value);
-		} else if (value === undefined) {
-			value = this[key];
+	function getAttribute(key) {
+		if (typeof getters[key] === 'function') {
+			return getters[key].call(this);
+		}
+		return this[key];
+	}
+
+	function setAttribute(key, value) {
+		if (typeof setters[key] === 'function') {
+			setters[key].call(this, value);
 		} else {
 			this[key] = value;
 		}
-		return value;
 	}
 
-	function getOrSetObjectAttribute(attr, key, value) {
+	function getOrSetObjectBasedAttribute(attr, key, value) {
 		var params = this.attr(attr);
 		if (truthy(key) && truthy(value)) {
 			params[key] = value;
@@ -90,9 +93,9 @@
 		return params;
 	}
 
-	function alias(key, map) {
+	function alias(key, func) {
 		return function () {
-			return mapAttributes.call(this, key);
+			return func.call(this, key);
 		};
 	}
 
@@ -105,21 +108,15 @@
 			return supplant(URL.template, data);
 		},
 		pathname: function () {
-			var path = this.pathname.join('/');
+			var path = this.segments.join('/');
 			return path ? ('/' + path + '/') : '/';
 		},
 		search: function () {
-			var key, params = this.search, search = [];
+			var key, params = this.params, search = [];
 			for (key in params) {
 				search.push(key + ((params[key]) ? ('=' + params[key]) : ''));
 			}
 			return (search.length) ? '?' + search.join('&') : '';
-		},
-		params: function () {
-			return this.search;
-		},
-		segments: function () {
-			return this.pathname;
 		}
 	};
 
@@ -131,7 +128,7 @@
 			if (typeof value === 'object') {
 				value = getters.pathname.call(this);
 			}
-			this.pathname = value.replace(/^\/|\/$/g, '').split('/');
+			this.segments = value.replace(/^\/|\/$/g, '').split('/');
 		},
 		port: function (value) {
 			value = parseInt(value, 10);
@@ -159,7 +156,7 @@
 					}
 				});
 			}
-			this.search = params;
+			this.params = params;
 		}
 	};
 
@@ -171,8 +168,8 @@
 	};
 
 	forEach(aliases, function (attr, key) {
-		getters[key] = alias(attr);
-		setters[key] = alias(attr);
+		getters[key] = alias(attr, getAttribute);
+		setters[key] = alias(attr, setAttribute);
 	});
 
 	// ! Public API
@@ -186,16 +183,16 @@
 	URL.prototype = {
 		constructor: URL,
 		segment: function (index, value) {
-			return getOrSetObjectAttribute.call(this, 'segments', index, value);
+			return getOrSetObjectBasedAttribute.call(this, 'segments', index, value);
 		},
 		param: function (key, value) {
-			return getOrSetObjectAttribute.call(this, 'params', key, value);
+			return getOrSetObjectBasedAttribute.call(this, 'params', key, value);
 		},
 		attr: function (key, value) {
 			if (value === undefined) {
-				return mapAttributes.call(this._data, key);
+				return getAttribute.call(this._data, key);
 			}
-			mapAttributes.call(this._data, key, value);
+			setAttribute.call(this._data, key, value);
 			return this;
 		},
 		get: function () {
