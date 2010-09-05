@@ -23,6 +23,7 @@ test('url.attr() -> getter', function () {
 	equals(url.attr('source'), url_string, 'url.attr("source")');
 	equals(url.attr('path'), '/jQuery.ajax/', 'url.attr("path")');
 	equals(url.attr('query'), '?key1=value1&key2=value2&key3', 'url.attr("query")');
+	equals(url.attr('domain'), 'api.jquery.com', 'url.attr("domain")');
 	same(url.attr('params'), {key1:'value1', key2:'value2', key3:''}, 'url.attr("params")');
 	same(url.attr('segments'), ['jQuery.ajax'], 'url.attr("segments")');
 

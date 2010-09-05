@@ -354,9 +354,10 @@
 	// Common aliases to the default attributes.
 	aliases = {
 		hostname: 'host',
-		source: 'href',
-		path: 'pathname',
-		query: 'search'
+		source:   'href',
+		path:     'pathname',
+		query:    'search',
+		domain:   'hostname'
 	};
 
 	// Assign the aliages to the getter and setter objects.
