@@ -436,7 +436,7 @@
 		//   url.param('page', '2').attr('search');
 		//   //=> '?q=bagels&page=2'
 		//
-		//   url.segment();
+		//   url.param();
 		//   //=> {q: 'bagels', page: 2}
 		//
 		// Returns either an Object a String or a URL instance.
