@@ -7,13 +7,40 @@
 	var anchor = document.createElement('a'),
 	    setters, getters, aliases;
 
+	// ! Utilities
+
+	// Check whether or not a variable is a truthy value.
+	//
+	// value  - The value to check.
+	//
+	// Examples
+	//
+	//   truthy(6);
+	//   //=> true
+	//
+	//   truthy(parseInt('Cat', 10));
+	//   //=> false
+	//
+	// Returns true if the value is truthy
+
 	function truthy(value) {
 		return [undefined, null, NaN].indexOf(value) === -1;
 	}
 
-	// ! Utilities
+	// Replaces {tokens} within a string with values.
+	//
+	// Source: http://javascript.crockford.com/remedial.html
+	//
+	// string - A String containing tokens.
+	// values - An Object containing key/value pairs.
+	//
+	// Examples
+	//
+	//   supplant('My name is {name}', {name: 'Bill'});
+	//   //=> 'My name is Bill'
+	//
+	// Returns a String with tokens replaced.
 
-	// http://javascript.crockford.com/remedial.html
 	function supplant(string, values) {
 		return string.replace(/{([^{}]*)}/g,
 				function (match, tag) {
@@ -22,6 +49,24 @@
 				}
 		);
 	}
+
+	// Iterates over any object or Array-like object and calls the
+	// callback function passing in the key and value as parameters.
+	//
+	// object   - The Object to iterate over.
+	// callback - A callback Function to call on each iteration, it
+	//            recieves the value, key and object as parameters.
+	// context  - The object that represents "this" within the callback.
+	//            Defaults to the global object.
+	//
+	// Examples
+	//
+	//    foreach([1, 2, 3], function (v, k, a) {
+	//      console.log('Index: ' + v + ' Value: ' + k + ', ');
+	//    })
+	//    // Outputs "Index: 1 Value: 1, Index: 2 Value: 2, Index: 3 Value: 3, "
+	//
+	// Returns nothing.
 
 	function forEach(object, callback, context) {
 		var index, length;
@@ -42,6 +87,18 @@
 		}
 	}
 
+	// Extends an object with the properties of another.
+	//
+	// reciever - An object to extend.
+	// object   - An object of properties.
+	//
+	// Examples
+	//
+	//    extend({name: 'Bill'}, {age: 20});
+	//    //=> {name: 'Bill', age: 20}
+	//
+	// Returns the extended Object.
+
 	function extend(reciever, object) {
 		forEach(object, function (value, key) {
 			reciever[key] = value;
@@ -50,6 +107,29 @@
 	}
 
 	// ! Private Functions
+
+	// Accepts a URL and breaks it into individual properties.
+	//
+	// The returned object has the following properties.
+	// :protocol => A String of the protocol eg. http
+	// :host     => The URL domain String.
+	// :port     => The port as an Integer if present in the URL
+	//              else an empty string.
+	// :segments => An Array of path segments.
+	// :hash     => The hash String including #.
+	// :params   => An Object of key/value query parameters.
+	//
+	// url - A URL String
+	//
+	// Examples
+	//
+	//   getURLData('http://www.example.com/stuff/?page=1');
+	//   //=> {protocol: 'http', host: 'www.example.com',
+	//          port: '', segments: ['stuff'], hash: '',
+	//          params: {page: 1}}
+	//
+	// Returns an Object of metadata.
+
 
 	function getURLData(url) {
 		var data = {};
@@ -65,12 +145,43 @@
 		return data;
 	}
 
+	// Returns the URL attribute for the key supplied.
+	//
+	// Either returns the key directly from the data object (this)
+	// or if there is a getter defined for the key call and
+	// return the getter function.
+	//
+	// key - String for the attribute key eg. 'hash'.
+	//
+	// Examples
+	//
+	//   getAttribute('hash');
+	//   //=> '#value'
+	//
+	// Returns the URL attribute for the key supplied.
+
 	function getAttribute(key) {
 		if (typeof getters[key] === 'function') {
 			return getters[key].call(this);
 		}
 		return this[key];
 	}
+
+	// Sets the URL attribute for the key to the value supplied.
+	//
+	// Either sets the value directly on the context or if a
+	// setter exists for the key calls it passing the value in
+	// as a property.
+	//
+	// key   - String for the attribute key. eg. 'params'.
+	// value - Any JavaScript data type suitable for the attribute.
+	//
+	// Examples
+	//
+	//   setAttribute('params', {param1: 'value1'});
+	//   //=> The params property will be set to  {param1: 'value1'}.
+	//
+	// Returns nothing.
 
 	function setAttribute(key, value) {
 		if (typeof setters[key] === 'function') {
@@ -79,6 +190,22 @@
 			this[key] = value;
 		}
 	}
+
+	// Convenience function for making setting/getting object
+	// based attributes such as "params" and "segments" easier.
+	//
+	// If no key is provided the function returns the entire Object.
+	//
+	// attr  - The attribute String to set or get. eg. 'params'
+	// key   - The key String/index Integer of the attribute.
+	// value - The value to set.
+	//
+	// Examples
+	//
+	//   getOrSetObjectBasedAttribute('segments', 1, 'edit');
+	//   //=> Sets the second path segment to 'edit'.
+	//
+	// Returns either the key value or the entire Object.
 
 	function getOrSetObjectBasedAttribute(attr, key, value) {
 		var params = this.attr(attr);
@@ -92,6 +219,23 @@
 		}
 		return params;
 	}
+
+	// Provides an alias to a getter/setter function.
+	//
+	// Makes it easy to set up aliased methods to the data
+	// attributes. For example aliasing a 'query' attribute
+	// to return the 'search' string. 
+	//
+	// key      - The attribute to alias.
+	// function - Either the getAttribute or setAttribute
+	//            Function
+	// Examples
+	//
+	//   getters.query = alias('search', getAttribute);
+	//   url.attr('query');
+	//   //=> {param1: 'value1'}
+	//
+	// Returns the aliased Function.
 
 	function alias(key, func) {
 		return function () {
