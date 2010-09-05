@@ -224,7 +224,7 @@
 	//
 	// Makes it easy to set up aliased methods to the data
 	// attributes. For example aliasing a 'query' attribute
-	// to return the 'search' string. 
+	// to return the 'search' string.
 	//
 	// key      - The attribute to alias.
 	// function - Either the getAttribute or setAttribute
@@ -243,7 +243,16 @@
 		};
 	}
 
+	// Getters are used to pre-parse or format attributes.
+	// Each attribute has access to the URL data object
+	// and can return any value.
+
 	getters = {
+
+		// Compiles the full URL from the data object.
+		//
+		// Returns recompiled URL String.
+
 		href: function () {
 			var data = extend({}, this);
 			data.search   = getters.search.call(this);
@@ -251,10 +260,17 @@
 			data.port     = this.port ? ':' + this.port : '';
 			return supplant(URL.template, data);
 		},
+
+		// Returns the pathname string by joining the segments Array.
+
 		pathname: function () {
 			var path = this.segments.join('/');
 			return path ? ('/' + path + '/') : '/';
 		},
+
+		// Returns the "search" query string by compiling the
+		// parameters object.
+
 		search: function () {
 			var key, params = this.params, search = [];
 			for (key in params) {
@@ -264,23 +280,54 @@
 		}
 	};
 
+	// Setters are used to preparse values before assigning
+	// them to the properties on the context.
+
 	setters = {
+
+		// Parses a URL string and assigns it to the data object.
+		//
+		// value - A full or partial URL String.
+		//
+		// Returns nothing.
+
 		href: function (value) {
 			extend(this, getURLData(value));
 		},
+
+		// Sets the segments attribute by expanding the path String.
+		//
+		// value - A filepath String eg. "/users/bill"
+		//
+		// Returns nothing.
+
 		pathname: function (value) {
 			if (typeof value === 'object') {
 				value = getters.pathname.call(this);
 			}
 			this.segments = value.replace(/^\/|\/$/g, '').split('/');
 		},
-		port: function (value) {
-			value = parseInt(value, 10);
-			if ( ! value) {
-				value = '';
+
+		// Sets the port attribute, defaults to an empty String.
+		//
+		// port - An Integer for the port number.
+		//
+		// Returns nothing.
+
+		port: function (port) {
+			port = parseInt(port, 10);
+			if ( ! truthy(port)) {
+				port = '';
 			}
-			this.port = value;
+			this.port = port;
 		},
+
+		// Sets the params attribute from the search String.
+		//
+		// search - A url-form-encoded query String.
+		//
+		// Returns nothing.
+
 		search: function (search) {
 			var params = {},
 			    query;
@@ -304,6 +351,7 @@
 		}
 	};
 
+	// Common aliases to the default attributes.
 	aliases = {
 		hostname: 'host',
 		source: 'href',
@@ -311,6 +359,7 @@
 		query: 'search'
 	};
 
+	// Assign the aliages to the getter and setter objects.
 	forEach(aliases, function (attr, key) {
 		getters[key] = alias(attr, getAttribute);
 		setters[key] = alias(attr, setAttribute);
@@ -318,20 +367,104 @@
 
 	// ! Public API
 
+	// Constructor that assigns the private _data property.
+	//
+	// url - A full or partial URL String.
+	//
+	// Returns nothing.
+
 	function URL(url) {
 		this._data = getURLData(url);
 	}
 
+	// A template for a full URL String.
+
 	URL.template = '{protocol}//{host}{port}{pathname}{search}{hash}';
 
 	URL.prototype = {
+
 		constructor: URL,
+
+		// Gets and sets the path segments attribute.
+		//
+		// If no parameters are passed in the full segments Array will be
+		// returned. If an index is provided that segment String will be
+		// returned or undefined if not found.
+		// To set a segment pass the index Integer and a String value. The
+		// URL instance will be returned to enable method chaining.
+		//
+		// index - An Integer of the segment index (Optional).
+		// value - A String for the segment value (Optional).
+		//
+		// Examples
+		//
+		//   url = new URL('/this/is/a/path/');
+		//   url.segment(1);
+		//   //=> 'is'
+		//
+		//   url.segment(3, 'cabbage').attr('path');
+		//   //=> '/this/is/a/cabbage'
+		//
+		//   url.segment();
+		//   //=> ['this', 'is', 'a', 'path']
+		//
+		// Returns either an Array a String or a URL instance.
+
 		segment: function (index, value) {
 			return getOrSetObjectBasedAttribute.call(this, 'segments', index, value);
 		},
+
+		// Gets and sets the query param attribute.
+		//
+		// If no parameters are passed in the full params Object will be
+		// returned.
+		// If a key String is provided that parameter String will be
+		// returned or undefined if not found.
+		// To set a parameter pass the key String and a value. The
+		// URL instance will be returned to enable method chaining.
+		//
+		// key   - A String of the parameter key (Optional).
+		// value - A String for the parameter value (Optional).
+		//
+		// Examples
+		//
+		//   url = new URL('/search/?q=bagels&page=1');
+		//   url.param('q');
+		//   //=> 'bagels'
+		//
+		//   url.param('page', '2').attr('search');
+		//   //=> '?q=bagels&page=2'
+		//
+		//   url.segment();
+		//   //=> {q: 'bagels', page: 2}
+		//
+		// Returns either an Object a String or a URL instance.
+
 		param: function (key, value) {
 			return getOrSetObjectBasedAttribute.call(this, 'params', key, value);
 		},
+
+		// Gets or Sets a URL attribute.
+		//
+		// When only the key is provided the requested property is returned
+		// or undefined if it does not exist. When a key and value are
+		// passed in, the attribute is set and the instance is returned
+		// to allow chaining.
+		//
+		// key   - String for the attribute key to get/set.
+		// value - Value to set to the attribute.
+		//
+		// Examples
+		//
+		//   url = new URL('http://example.com/search/?q=bagels&page=1');
+		//   url.attr('protocol');
+		//   //=> 'http'
+		//
+		//   url.attr('path', 'index').attr('search', '').get();
+		//   //=> 'http://example.com/index/'
+		//
+		// Returns either the attribute or the URL instance.
+
 		attr: function (key, value) {
 			if (value === undefined) {
 				return getAttribute.call(this._data, key);
@@ -339,17 +472,57 @@
 			setAttribute.call(this._data, key, value);
 			return this;
 		},
+
+		// Returns the full URL an alias of URL#toString().
+		//
+		// Example
+		//
+		//   url = new URL('http://example.com/search/?q=bagels&page=1');
+		//   url.get();
+		//   //=> 'http://example.com/search/?q=bagels&page=1'
+		//
+		// Returns the URL String.
+
 		get: function () {
 			return this.attr('href');
 		},
+
+		// Returns the full URL.
+		//
+		// Example
+		//
+		//   url = new URL('http://example.com/search/?q=bagels&page=1');
+		//   url.toString();
+		//   //=> 'http://example.com/search/?q=bagels&page=1'
+		//
+		// Returns the URL String.
+
 		toString: function () {
 			return this.attr('href');
 		}
 	};
 
 	if ($ === undefined) {
+		// Assigns the URL to the global object.
 		window.URL = URL;
 	} else {
+
+		// Returns a URL instance.
+		//
+		// Accepts a simple URL string. An HTML element that has a URL
+		// attribute such as an <a> or <form> or a jQuery collection in
+		// which case only the first item will be used.
+		//
+		// url - An HTML Element, jQuery collection or String
+		//
+		// Examples
+		//
+		//   $.url($('a'));
+		//   $.url(document.getElementById('my-form'));
+		//   $.url('http://jquery.com');
+		//
+		// Returns a URL instance.
+
 		$.url = function (url) {
 			var map = {
 				a: 'href', img: 'src', form: 'action', base: 'href',
@@ -362,10 +535,24 @@
 			return new URL(url);
 		};
 
+		// Returns a URL instance if the jQuery object contains an
+		// HTML element from which a URL can be extracted.
+		//
+		// NOTE: Like jQuery#attr() this method acts only on the first
+		// item in the collection returning one instance.
+		//
+		// Examples
+		//
+		//   $('<a href="http://jquery.com">').url().get();
+		//   //=> 'http://jquery.com'
+		//
+		// Returns an instance of URL.
+
 		$.fn.url = function () {
 			return $.url(this);
 		};
 
+		// Export the URL consructor to the namespace.
 		$.url.URL = URL;
 	}
 })(this.jQuery, this);
