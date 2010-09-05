@@ -24,7 +24,3 @@ Doing a `.toString()` on the URL object at any time will return the current stri
 The `.segment(i)` method (where 'i' is the segment number, starting from zero) will return the corresponding segment from the URL. Including a second parameter will set that segment.
 
 The `.param('key')` method (where 'key' is the query string key) will return the corresponding value of the suppied key in the URL query (GET) string, if there is one. Including a second parameter will set that parameter.
-
-If you have a hash fragment that consists of segments, like `#/part1/part2/` then you can get/set those segments using the `hashSegment()` method, which works exactly like the segment() one.
-
-Similarly if you have a hash fragment that looks like a query string, the parts can be get/set using the `hashParam()` method.
