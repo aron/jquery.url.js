@@ -24,7 +24,7 @@
 	// Returns true if the value is truthy
 
 	function truthy(value) {
-		return [undefined, null, NaN].indexOf(value) === -1;
+		return ! (value === undefined || value === null || (typeof value === 'number' && isNaN(value)));
 	}
 
 	// Replaces {tokens} within a string with values.
