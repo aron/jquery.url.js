@@ -7,6 +7,17 @@ test('new URL()', function () {
 	ok(url instanceof URL);
 });
 
+test('URL.parseQueryString()', function () {
+	same(URL.parseQueryString("?param1=value1&param2=value2&param2=value3&value4&number=0"), {
+		param1: 'value1',
+		param2: ['value2', 'value3'],
+		value4: '',
+		number: 0
+	}, 'url.parseQueryString()');
+	same(URL.parseQueryString(""), {}, 'url.parseQueryString("")');
+	same(URL.parseQueryString("?"), {}, 'url.parseQueryString("?")');
+});
+
 test('url.attr() -> getter', function () {
 	var url = new URL(url_string);
 

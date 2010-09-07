@@ -209,7 +209,7 @@
 
 	function getOrSetObjectBasedAttribute(attr, key, value) {
 		var params = this.attr(attr);
-		if (truthy(key) && truthy(value)) {
+		if (truthy(key) && value !== undefined) {
 			params[key] = value;
 			this.attr(attr, params);
 			return this;
@@ -329,25 +329,10 @@
 		// Returns nothing.
 
 		search: function (search) {
-			var params = {},
-			    query;
-
 			if (typeof search === 'object') {
 				search = getters.search.call(this);
 			}
-
-			search = search.replace(/^\?/, '');
-			if (search) {
-				query = search.split('&');
-				forEach(query, function (pair) {
-					param = pair.split('=');
-					params[param[0]] = '';
-					if (param[1]) {
-						params[param[0]] = param[1];
-					}
-				});
-			}
-			this.params = params;
+			this.params = URL.parseQueryString(search);
 		}
 	};
 
@@ -381,6 +366,50 @@
 	// A template for a full URL String.
 
 	URL.template = '{protocol}//{host}{port}{pathname}{search}{hash}';
+
+	// Parses a query string and returns an object.
+	//
+	// Converts numeric values into integers and if
+	// a key occurs more than once in the query the
+	// values will be added to an Array.
+	//
+	// Examples
+	//
+	//   URL.parseQueryString('name=bill&email=bill@example.com');
+	//   //=> {name: "bill", email: "bill@example.com"}
+	//
+	//   URL.parseQueryString('fields=value1&fields=value2');
+	//   //=> {fields: ["value1", "value2"]}
+	//
+	// Returns an Object of key value pairs.
+
+	URL.parseQueryString = function (query) {
+		var params = {};
+		query = query.replace(/^\?|#$/g, '');
+		if (query) {
+			forEach(query.split('&'), function (pair) {
+				var param = pair.split('='),
+				    key   = param[0],
+				    value = param[1] || '',
+				    integer;
+
+				if (value) {
+					integer = parseInt(value, 10);
+					value   = truthy(integer) ? integer : value;
+				}
+
+				if (params[key]) {
+					if (toString.call(params[key]).slice(8, -1).toLowerCase() !== 'array') {
+						params[key] = [params[key]];
+					}
+					params[key].push(value);
+				} else {
+					params[key] = value;
+				}
+			});
+		}
+		return params;
+	};
 
 	URL.prototype = {
 
