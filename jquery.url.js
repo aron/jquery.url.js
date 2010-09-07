@@ -121,6 +121,103 @@
 		return reciever;
 	}
 
+	// Parses a query string and returns an object.
+	//
+	// Converts numeric values into integers and if
+	// a key occurs more than once in the query the
+	// values will be added to an Array.
+	//
+	// Examples
+	//
+	//   URL.parseQueryString('name=bill&email=bill@example.com');
+	//   //=> {name: "bill", email: "bill@example.com"}
+	//
+	//   URL.parseQueryString('fields=value1&fields=value2');
+	//   //=> {fields: ["value1", "value2"]}
+	//
+	// Returns an Object of key value pairs.
+
+	function parseQueryString(query) {
+		var params = {};
+		query = (typeOf(query) === 'string') ? query.replace(/^\?|#$/g, '') : '';
+		if (query) {
+			forEach(query.split('&'), function (pair) {
+				var param = pair.split('='),
+				    key   = param[0],
+				    value = param[1] || '',
+				    integer;
+
+				if (value) {
+					integer = parseInt(value, 10);
+					value   = truthy(integer) ? integer : value;
+				}
+
+				if (params[key]) {
+					if (typeOf(value) !== 'array') {
+						params[key] = [params[key]];
+					}
+					params[key].push(value);
+				} else {
+					params[key] = value;
+				}
+			});
+		}
+		return params;
+	};
+
+	// Returns a key/value string suitable for use
+	// in a query string.
+	//
+	// key   - A string for the query parameter.
+	// value - The parameter value, either an
+	//         Array, String or Integer.
+	//
+	// Examples
+	//
+	//   toQueryKey('name', 'Bill');
+	//   //=> "name=Bill"
+	//   toQueryKey('fields[]', ['value1', 'value2']);
+	//   //=> "fields[]=value1&fields[]=value2"
+	//
+	// Returns a String.
+
+	function toQueryKey(key, value) {
+		var values = (typeOf(value) === 'array') ? value : [value],
+		    query  = [];
+
+		key = encodeURIComponent(key.replace(' ', '+'));
+		forEach(values, function (v) {
+			var k = key;
+			if (truthy(v) && v !== '') {
+				k = k + '=' + encodeURIComponent(v);
+			}
+			query.push(k);
+		});
+		return query.join('&');
+	}
+
+	// Serializes an object of key/value pairs into a query string.
+	//
+	// The String will be prefixed with a '?' unless the object is
+	// empty in which case an empty String is returned.
+	//
+	// params - An Object
+	//
+	// Examples
+	//
+	//   toQueryString({name: 'Bill', email: 'bill@example.com');
+	//   //=> "?name=Bill&email=bill%40example.com"
+	//
+	// Returns a String.
+
+	function toQueryString(params) {
+		var key, query = [];
+		for (key in params) {
+			query.push(toQueryKey(key, params[key]));
+		}
+		return (query.length) ? '?' + query.join('&').replace(/%20/g, '+') : '';
+	};
+
 	// ! Private Functions
 
 	// Accepts a URL and breaks it into individual properties.
@@ -287,11 +384,7 @@
 		// parameters object.
 
 		search: function () {
-			var key, params = this.params, search = [];
-			for (key in params) {
-				search.push(key + ((params[key]) ? ('=' + params[key]) : ''));
-			}
-			return (search.length) ? '?' + search.join('&') : '';
+			return toQueryString(this.params);
 		}
 	};
 
@@ -347,7 +440,7 @@
 			if (typeof search === 'object') {
 				search = getters.search.call(this);
 			}
-			this.params = URL.parseQueryString(search);
+			this.params = parseQueryString(search);
 		}
 	};
 
@@ -382,49 +475,10 @@
 
 	URL.template = '{protocol}//{host}{port}{pathname}{search}{hash}';
 
-	// Parses a query string and returns an object.
-	//
-	// Converts numeric values into integers and if
-	// a key occurs more than once in the query the
-	// values will be added to an Array.
-	//
-	// Examples
-	//
-	//   URL.parseQueryString('name=bill&email=bill@example.com');
-	//   //=> {name: "bill", email: "bill@example.com"}
-	//
-	//   URL.parseQueryString('fields=value1&fields=value2');
-	//   //=> {fields: ["value1", "value2"]}
-	//
-	// Returns an Object of key value pairs.
 
-	URL.parseQueryString = function (query) {
-		var params = {};
-		query = query.replace(/^\?|#$/g, '');
-		if (query) {
-			forEach(query.split('&'), function (pair) {
-				var param = pair.split('='),
-				    key   = param[0],
-				    value = param[1] || '',
-				    integer;
-
-				if (value) {
-					integer = parseInt(value, 10);
-					value   = truthy(integer) ? integer : value;
-				}
-
-				if (params[key]) {
-					if (toString.call(params[key]).slice(8, -1).toLowerCase() !== 'array') {
-						params[key] = [params[key]];
-					}
-					params[key].push(value);
-				} else {
-					params[key] = value;
-				}
-			});
-		}
-		return params;
-	};
+	// Make the query string helpers public.
+	URL.toQueryString = toQueryString;
+	URL.parseQueryString = parseQueryString;
 
 	URL.prototype = {
 

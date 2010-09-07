@@ -14,8 +14,32 @@ test('URL.parseQueryString()', function () {
 		value4: '',
 		number: 0
 	}, 'url.parseQueryString()');
-	same(URL.parseQueryString(""), {}, 'url.parseQueryString("")');
-	same(URL.parseQueryString("?"), {}, 'url.parseQueryString("?")');
+	same(URL.parseQueryString(""), {}, 'Handles a blank string');
+	same(URL.parseQueryString("?"), {}, 'Handles a blank query string');
+	same(URL.parseQueryString({}), {}, 'Handles a non string value');
+});
+
+test('URL.toQueryString()', function () {
+	equals(
+		URL.toQueryString({param1: 'value1', param2: 'value2'}), 
+		"?param1=value1&param2=value2",
+		'Handles multiple values'
+	);
+	equals(
+		URL.toQueryString(
+			{'blank': '', 'undefined': undefined, 'null': null, 'NaN': NaN}
+		),
+		'?blank&undefined&null&NaN',
+		'Handles blank values'
+	);
+	equals(
+		URL.toQueryString({key: 'A string with spaces & entities'}),
+		'?key=A+string+with+spaces+%26+entities',
+		'Handles entities'
+	);
+	equals(URL.toQueryString({integer: 0}), '?integer=0', 'Handles integers');
+	equals(URL.toQueryString({fields: ['value1', 'value2']}), '?fields=value1&fields=value2', 'Handles arrays');
+	equals(URL.toQueryString({}), '', 'Handles a blank object');
 });
 
 test('url.attr() -> getter', function () {
