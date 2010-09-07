@@ -27,6 +27,21 @@
 		return ! (value === undefined || value === null || (typeof value === 'number' && isNaN(value)));
 	}
 
+	// Returns a string representing the type of Object.
+	//
+	// object - Any JavaScript object.
+	//
+	// Examples
+	//
+	//   typeOf([]);
+	//   //=> "array"
+	//
+	// Returns a String.
+
+	function typeOf(obj) {
+		return (obj === null) ? new String(obj) : toString.call(obj).slice(8, -1).toLowerCase();
+	}
+
 	// Replaces {tokens} within a string with values.
 	//
 	// Source: http://javascript.crockford.com/remedial.html
