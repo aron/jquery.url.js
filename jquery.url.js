@@ -152,7 +152,7 @@
 		var params = {};
 		query = (typeOf(query) === 'string') ? query.replace(/^\?|#$/g, '') : '';
 		if (query) {
-			forEach(query.split('&'), function (pair) {
+			forEach(query.split(/&|;/), function (pair) {
 				var param = pair.split('='),
 				    key   = param[0],
 				    value = param[1] || '',

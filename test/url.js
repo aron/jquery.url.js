@@ -14,6 +14,11 @@ test('URL.parseQueryString()', function () {
 		value4: '',
 		number: 0
 	}, 'url.parseQueryString()');
+	same(
+		URL.parseQueryString("param1=value1;param2=value2"),
+		{ param1: 'value1', param2: 'value2' },
+		'Handles a semi-colons string'
+	);
 	same(URL.parseQueryString(""), {}, 'Handles a blank string');
 	same(URL.parseQueryString("?"), {}, 'Handles a blank query string');
 	same(URL.parseQueryString({}), {}, 'Handles a non string value');
