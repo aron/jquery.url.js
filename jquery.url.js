@@ -152,10 +152,10 @@
 		var params = {};
 		query = (typeOf(query) === 'string') ? query.replace(/^\?|#$/g, '') : '';
 		if (query) {
-			forEach(query.split(/&|;/), function (pair) {
+			forEach(query.replace('+', ' ').split(/&|;/), function (pair) {
 				var param = pair.split('='),
-				    key   = param[0],
-				    value = param[1] || '',
+				    key   = decodeURI(param.shift()),
+				    value = decodeURI(param.join('=')) || '',
 				    integer;
 
 				if (value) {
