@@ -185,15 +185,15 @@
 	 *
 	 * Examples
 	 *
-	 *   toQueryKey('name', 'Bill');
+	 *   toQueryItem('name', 'Bill');
 	 *   //=> "name=Bill"
-	 *   toQueryKey('fields[]', ['value1', 'value2']);
+	 *   toQueryItem('fields[]', ['value1', 'value2']);
 	 *   //=> "fields[]=value1&fields[]=value2"
 	 *
 	 * Returns a String.
 	 */
 
-	function toQueryKey(key, value) {
+	function toQueryItem(key, value) {
 		var values = (typeOf(value) === 'array') ? value : [value],
 		    query  = [];
 
@@ -226,7 +226,7 @@
 	function toQueryString(params) {
 		var key, query = [];
 		for (key in params) {
-			query.push(toQueryKey(key, params[key]));
+			query.push(toQueryItem(key, params[key]));
 		}
 		return (query.length) ? '?' + query.join('&').replace(/%20/g, '+') : '';
 	};
