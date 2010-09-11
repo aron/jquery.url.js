@@ -5,6 +5,10 @@
 ;(function($, window, undefined) {
 
 	var anchor = document.createElement('a'),
+	    map = {
+	    	a: 'href', img: 'src', form: 'action', base: 'href',
+	    	script: 'src', iframe: 'src', link: 'href'
+	    },
 	    setters, getters, aliases;
 
 	// ! Utilities
@@ -279,13 +283,13 @@
 
 		setters.pathname.call(data, anchor.pathname);
 		setters.search.call(data, anchor.search);
-		
+
 		// Check to see if the URL has a port value.
 		data._hasPort = (/:\/\/[^\/]+:\d+[^\d]/).test(url);
-		
+
 		// If there isn't a port in the URL reset the data value.
 		if ( ! data._hasPort) { data.port = ''; }
-		
+
 		// Work around a but in Safari which will not set the port
 		// to 80 even if it is explicitly set in the url string.
 		if (/:\/\/[^\/]+:80[^\d]/.test(url)) { data.port = 80; }
@@ -371,6 +375,43 @@
 		return params;
 	}
 
+	/* Looks up the url attribute for a supplied element
+	 * if the element in question has one.
+	 *
+	 * element - An HTMLElement with a url attribute eg. <a>.
+	 *
+	 * Examples
+	 *
+	 *   getAttributeForElement(anchor);
+	 *   //=> 'href'
+	 *
+	 * Returns attribute String or an empty String.
+	 */
+
+
+	function getAttributeForElement(element) {
+		if (element === window.location) {
+			return 'href';
+		}
+		else if (element && element.tagName) {
+			return map[element.tagName.toLowerCase()];
+		}
+		return '';
+	}
+
+	/* Updates the HTMLElement linked to the URL instance.
+	 *
+	 * Should be called with the URL instance as the context.
+	 *
+	 * Returns nothing.
+	 */
+
+	function updateElement() {
+		if (this._element) {
+			this._element[getAttributeForElement(this._element)] = this.get();
+		}
+	}
+
 	/* Provides an alias to a getter/setter function.
 	 *
 	 * Makes it easy to set up aliased methods to the data
@@ -450,7 +491,7 @@
 		},
 
 		/* Sets the host property on the context.
-		 * 
+		 *
 		 * host - A domain String.
 		 *
 		 * Returns nothing.
@@ -458,6 +499,18 @@
 
 		host: function (host) {
 			this.host = host.replace(/:[\d]*/, '');
+		},
+
+		/* Sets the hash data property.
+		 *
+		 * hash - A hash string with or without the # prefixed.
+		 *
+		 * Returns nothing.
+		 */
+
+
+		hash: function (hash) {
+			this.hash = ( ! hash || hash.indexOf('#') === 0) ? hash : '#' + hash;
 		},
 
 		/* Sets the segments attribute by expanding the path String.
@@ -476,7 +529,7 @@
 
 		/* Sets the port attribute, defaults to an empty String.
 		 *
-		 * Also sets a "_hasPort" property that is true when the 
+		 * Also sets a "_hasPort" property that is true when the
 		 * port should be included in the full url string.
 		 *
 		 * port - An Integer for the port number.
@@ -526,15 +579,30 @@
 
 	// ! Public API
 
-	/* Constructor that assigns the private _data property.
+	/* Constructor that assigns the private properties.
 	 *
-	 * url - A full or partial URL String.
+	 * url - A full or partial URL String or an element with a
+	 *       url based attribute such as an anchor or script.
 	 *
 	 * Returns an instance of URL when called with new.
 	 */
 
 	function URL(url) {
-		this._data = getURLData(url || window.location.href);
+		var element = url, attr;
+
+		if (element === window.location || element === window.doucment) {
+			element = window.location;
+		}
+
+		attr = getAttributeForElement(element);
+
+		if (attr) {
+			url = element[attr];
+			this._element = element;
+		}
+
+		url = url && typeof url === 'string' ? url : window.location.href;
+		this._data = getURLData(url);
 	}
 
 	// A template for a full URL String.
@@ -638,6 +706,7 @@
 				return getAttribute.call(this._data, key);
 			}
 			setAttribute.call(this._data, key, value);
+			updateElement.call(this);
 			return this;
 		},
 
@@ -723,15 +792,8 @@
 		 */
 
 		$.url = function (url) {
-			var map = {
-				a: 'href', img: 'src', form: 'action', base: 'href',
-				script: 'src', iframe: 'src', link: 'href'
-			};
-
 			if (url instanceof jQuery) { url = url.get(0); }
-			if (url && url.tagName) { url = url[map[url.tagName.toLowerCase()]]; }
-
-			return new URL(typeof url === 'string' ? url : '');
+			return new URL(url);
 		};
 
 		/* Returns a URL instance if the jQuery object contains an

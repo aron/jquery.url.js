@@ -81,7 +81,7 @@ test('url.attr() -> getter', function () {
 
 test('url.attr() -> setter', function () {
 	var url = new URL('');
-	url.attr('hash', '#hash')
+	url.attr('hash', 'hash')
 	   .attr('host', 'example.com')
 	   .attr('pathname', '/part1/part2')
 	   .attr('port', '8080')
@@ -146,4 +146,16 @@ test('url.get()', function () {
 test('url.toString()', function () {
 	var url = new URL(url_string);
 	equals(url.toString(), url_string);
+});
+
+test('url updates element', function () {
+	var anchor  = document.createElement('link'),
+	    href    = 'http://google.com/search/',
+	    url;
+
+	anchor.href = href;
+	url = new URL(anchor);
+	equals(url.get(), href, 'should be the same as the anchor');
+	url.attr('hash', 'oohahash');
+	equals(anchor.href, href + '#oohahash', 'should have updated the anchor');
 });
