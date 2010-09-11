@@ -534,7 +534,7 @@
 	 */
 
 	function URL(url) {
-		this._data = getURLData(url);
+		this._data = getURLData(url || window.location.href);
 	}
 
 	// A template for a full URL String.
