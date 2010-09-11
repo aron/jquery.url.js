@@ -28,22 +28,34 @@
 		return ! (value === undefined || value === null || (typeof value === 'number' && isNaN(value)));
 	}
 
-	/* Checks an object to see if it is an Array.
+	/* Returns a string representing the type of Object.
 	 *
-	 * Source: http://code.jquery.com/jquery-latest.js
+	 * Source: http://javascript.crockford.com/remedial.html
 	 *
-	 * obj - Any JavaScript object.
+	 * value - Any JavaScript object.
 	 *
 	 * Examples
 	 *
-	 *   isArray([]);
-	 *   //=> true
+	 *   typeOf([]);
+	 *   //=> "array"
 	 *
-	 * Returns true if the object is an array.
+	 * Returns a String.
 	 */
 
-	function isArray(obj) {
-		return toString.call(obj).slice(8, -1).toLowerCase() === 'array';
+	function typeOf(value) {
+		var string = typeof value;
+		if (string === 'object') {
+			if (value) {
+				if (typeof value.length === 'number' &&
+					! value.propertyIsEnumerable('length') &&
+					typeof value.splice === 'function') {
+					string = 'array';
+				}
+			} else {
+				string = 'null';
+			}
+		}
+		return string;
 	}
 
 	/* Replaces {tokens} within a string with values.
@@ -77,7 +89,7 @@
 	 * callback - A callback Function to call on each iteration, it
 	 *            recieves the value, key and object as parameters.
 	 * context  - The object that represents "this" within the callback.
-	 *            Defaults to the context under which the function 
+	 *            Defaults to the context under which the function
 	 *            was called.
 	 *
 	 * Examples
@@ -164,7 +176,7 @@
 				}
 
 				if (params[key]) {
-					if ( ! isArray(value)) {
+					if (typeOf(value) !== 'array') {
 						params[key] = [params[key]];
 					}
 					params[key].push(value);
@@ -194,7 +206,7 @@
 	 */
 
 	function toQueryItem(key, value) {
-		var values = (isArray(value)) ? value : [value],
+		var values = (typeOf(value) === 'array') ? value : [value],
 		    query  = [];
 
 		key = encodeURIComponent(key.replace(' ', '+'));
@@ -606,7 +618,7 @@
 
 		/* Checks to see if the URL points to a local or
 		 * a remote resource.
-		 * 
+		 *
 		 * location - String, either "local" or "remote".
 		 *
 		 * Examples
@@ -614,14 +626,14 @@
 		 *   var url = new URL('http://www.google.com');
 		 *   url.is('external')
 		 *   //=> true
-		 * 
+		 *
 		 *   url = new URL('/posts/page/2');
 		 *   url.is('internal')
 		 *   //=> true
 		 *
 		 * Returns true if the condition is met otherwise false.
 		 */
-		
+
 
 		is: function (location) {
 			var local = this.attr('host') === window.location.host;
@@ -717,13 +729,13 @@
 
 		// Export the URL consructor to the namespace.
 		$.url.URL = URL;
-		
+
 		$.extend($.expr[':'], {
 			remote: function (element) {
-				return $.url(element).is('remote'); 
+				return $.url(element).is('remote');
 			},
 			local: function (element) {
-				return $.url(element).is('local'); 
+				return $.url(element).is('local');
 			}
 		});
 	}
