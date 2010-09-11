@@ -279,7 +279,16 @@
 
 		setters.pathname.call(data, anchor.pathname);
 		setters.search.call(data, anchor.search);
-		if (/\:80\//.test(url)) { data.port = 80; }
+		
+		// Check to see if the URL has a port value.
+		data._hasPort = (/:\/\/[^\/]+:\d+[^\d]/).test(url);
+		
+		// If there isn't a port in the URL reset the data value.
+		if ( ! data._hasPort) { data.port = ''; }
+		
+		// Work around a but in Safari which will not set the port
+		// to 80 even if it is explicitly set in the url string.
+		if (/:\/\/[^\/]+:80[^\d]/.test(url)) { data.port = 80; }
 		return data;
 	}
 
@@ -402,7 +411,7 @@
 			var data = extend({}, this);
 			data.search   = getters.search.call(this);
 			data.pathname = getters.pathname.call(this);
-			data.port     = this.port ? ':' + this.port : '';
+			data.port     = this._hasPort ? ':' + this.port : '';
 			return supplant(URL.template, data);
 		},
 
@@ -467,6 +476,9 @@
 
 		/* Sets the port attribute, defaults to an empty String.
 		 *
+		 * Also sets a "_hasPort" property that is true when the 
+		 * port should be included in the full url string.
+		 *
 		 * port - An Integer for the port number.
 		 *
 		 * Returns nothing.
@@ -474,7 +486,9 @@
 
 		port: function (port) {
 			port = parseInt(port, 10);
+			this._hasPort = true;
 			if ( ! truthy(port)) {
+				this._hasPort = false;
 				port = '';
 			}
 			this.port = port;
