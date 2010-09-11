@@ -128,6 +128,16 @@ test('url.param() -> setter', function () {
 	equals(url.param('key4'), 'value4');
 });
 
+test('url.is()', function () {
+	var url = new URL('');
+	ok(url.is('local'), 'URL is local');
+	ok( ! url.is('remote'), 'URL is not remote');
+
+	url = new URL('http://google.com');
+	ok(url.is('remote'), url + ' is remote');
+	ok( ! url.is('local'), url + ' is not local');
+});
+
 test('url.get()', function () {
 	var url = new URL(url_string);
 	equals(url.get(), url_string);

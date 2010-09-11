@@ -604,6 +604,34 @@
 			return this;
 		},
 
+		/* Checks to see if the URL points to a local or
+		 * a remote resource.
+		 * 
+		 * location - String, either "local" or "remote".
+		 *
+		 * Examples
+		 *
+		 *   var url = new URL('http://www.google.com');
+		 *   url.is('external')
+		 *   //=> true
+		 * 
+		 *   url = new URL('/posts/page/2');
+		 *   url.is('internal')
+		 *   //=> true
+		 *
+		 * Returns true if the condition is met otherwise false.
+		 */
+		
+
+		is: function (location) {
+			var local = this.attr('host') === window.location.host;
+			switch (location.replace(':', '')) {
+				case 'local':  return local;
+				case 'remote': return ! local;
+			}
+			return false;
+		},
+
 		/* Returns the full URL an alias of URL#toString().
 		 *
 		 * Example
@@ -664,7 +692,7 @@
 			};
 
 			if (url instanceof jQuery) { url = url.get(0); }
-			if (url.tagName) { url = url[map[url.tagName]]; }
+			if (url.tagName) { url = url[map[url.tagName.toLowerCase()]]; }
 
 			return new URL(url);
 		};
@@ -689,5 +717,14 @@
 
 		// Export the URL consructor to the namespace.
 		$.url.URL = URL;
+		
+		$.extend($.expr[':'], {
+			remote: function (element) {
+				return $.url(element).is('remote'); 
+			},
+			local: function (element) {
+				return $.url(element).is('local'); 
+			}
+		});
 	}
 })(this.jQuery, this);
