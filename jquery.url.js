@@ -440,6 +440,17 @@
 			extend(this, getURLData(value));
 		},
 
+		/* Sets the host property on the context.
+		 * 
+		 * host - A domain String.
+		 *
+		 * Returns nothing.
+		 */
+
+		host: function (host) {
+			this.host = host.replace(/:[\d]*/, '');
+		},
+
 		/* Sets the segments attribute by expanding the path String.
 		 *
 		 * value - A filepath String eg. "/users/bill"
