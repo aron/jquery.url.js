@@ -28,7 +28,7 @@
 		return ! (value === undefined || value === null || (typeof value === 'number' && isNaN(value)));
 	}
 
-	/* Returns a string representing the type of Object.
+	/* Checks an object to see if it is an Array.
 	 *
 	 * Source: http://code.jquery.com/jquery-latest.js
 	 *
@@ -36,14 +36,14 @@
 	 *
 	 * Examples
 	 *
-	 *   typeOf([]);
-	 *   //=> "array"
+	 *   isArray([]);
+	 *   //=> true
 	 *
-	 * Returns a String.
+	 * Returns true if the object is an array.
 	 */
 
-	function typeOf(obj) {
-		return (obj === null) ? new String(obj) : toString.call(obj).slice(8, -1).toLowerCase();
+	function isArray(obj) {
+		return toString.call(obj).slice(8, -1).toLowerCase() === 'array';
 	}
 
 	/* Replaces {tokens} within a string with values.
@@ -164,7 +164,7 @@
 				}
 
 				if (params[key]) {
-					if (typeOf(value) !== 'array') {
+					if ( ! isArray(value)) {
 						params[key] = [params[key]];
 					}
 					params[key].push(value);
@@ -194,7 +194,7 @@
 	 */
 
 	function toQueryItem(key, value) {
-		var values = (typeOf(value) === 'array') ? value : [value],
+		var values = (isArray(value)) ? value : [value],
 		    query  = [];
 
 		key = encodeURIComponent(key.replace(' ', '+'));
