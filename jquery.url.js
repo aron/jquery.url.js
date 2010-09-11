@@ -729,9 +729,9 @@
 			};
 
 			if (url instanceof jQuery) { url = url.get(0); }
-			if (url.tagName) { url = url[map[url.tagName.toLowerCase()]]; }
+			if (url && url.tagName) { url = url[map[url.tagName.toLowerCase()]]; }
 
-			return new URL(url);
+			return new URL(typeof url === 'string' ? url : '');
 		};
 
 		/* Returns a URL instance if the jQuery object contains an
