@@ -108,7 +108,7 @@
 			if (Array.prototype.forEach) {
 				Array.prototype.forEach.call(object, callback, context);
 			} else {
-				for (index = 0, length = index.length; index < length; index += 1) {
+				for (index = 0, length = object.length; index < length; index += 1) {
 					callback.call(context || this, object[index], index, object);
 				}
 			}
