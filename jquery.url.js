@@ -150,7 +150,7 @@
 
 	function parseQueryString(query) {
 		var params = {};
-		query = (typeOf(query) === 'string') ? query.replace(/^\?|#$/g, '') : '';
+		query = (typeof query === 'string') ? query.replace(/^\?|#$/g, '') : '';
 		if (query) {
 			forEach(query.replace('+', ' ').split(/&|;/), function (pair) {
 				var param = pair.split('='),
